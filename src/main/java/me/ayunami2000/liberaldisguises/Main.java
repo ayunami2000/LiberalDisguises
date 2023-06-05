@@ -27,7 +27,6 @@ public class Main extends JavaPlugin implements Listener {
 			PlayerDisguise playerDisguise = (PlayerDisguise) event.getDisguise();
 			String targetName = playerDisguise.getName();
 			String origName = event.getDisguised().getName();
-			playerDisguise.setTablistName(origName);
 			playerDisguise.setName(origName);
 			playerDisguise.setNameVisible(true);
 			playerDisguise.getWatcher().setNameYModifier(0);
