@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+}
+
+group 'me.ayunami2000.liberaldisguises'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        content {
+            includeGroup 'org.bukkit'
+            includeGroup 'org.spigotmc'
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT'
+    implementation files('libs/LibsDisguises-10.0.34-Premium.jar')
+    implementation files('libs/ProtocolLib.jar')
+}
