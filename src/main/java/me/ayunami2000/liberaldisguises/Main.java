@@ -6,14 +6,29 @@ import me.libraryaddict.disguise.disguisetypes.watchers.PhantomWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.SlimeWatcher;
 import me.libraryaddict.disguise.events.DisguiseEvent;
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Main extends JavaPlugin implements Listener {
+public class Main extends JavaPlugin implements Listener, CommandExecutor {
 	@Override
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);
+		JavaPlugin disgPlugin = (JavaPlugin) getServer().getPluginManager().getPlugin("LibsDisguises");
+		for (String cmd : disgPlugin.getDescription().getCommands().keySet()) {
+			if (cmd.equals("disguise") || cmd.equals("undisguise") || cmd.equals("disguisemodify") || cmd.equals("copydisguise") || cmd.equals("disguisehelp")) continue;
+			disgPlugin.getCommand(cmd).setTabCompleter(null);
+			disgPlugin.getCommand(cmd).setExecutor(this);
+		}
+	}
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		sender.sendMessage(ChatColor.GRAY + "That command is blocked.");
+		return true;
 	}
 
 	private static float safeYMod(float f) {
@@ -34,16 +49,6 @@ public class Main extends JavaPlugin implements Listener {
 		}
 		if (event.getDisguise().getType() == DisguiseType.FISHING_HOOK) {
 			event.getCommandSender().sendMessage(ChatColor.RED + "You cannot use Fishing Hook disguises");
-			/*
-			if (event.getCommandSender() instanceof Player player) {
-				player.sendMessage(ChatColor.BLUE + "You have thrown a rock, but you have also summoned a meteor!");
-				ItemStack rock = new ItemStack(Material.STONE);
-				ItemMeta meta = rock.getItemMeta();
-				meta.setDisplayName(ChatColor.RESET + "" + ChatColor.BLUE + "Rock");
-				rock.setItemMeta(meta);
-				player.getInventory().addItem(rock);
-			}
-			*/
 			return;
 		}
 		if (event.getDisguise().isHidePlayer()) event.getDisguise().setHidePlayer(false);
