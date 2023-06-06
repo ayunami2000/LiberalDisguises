@@ -11,18 +11,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin implements Listener, CommandExecutor {
 	@Override
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);
-		JavaPlugin disgPlugin = (JavaPlugin) getServer().getPluginManager().getPlugin("LibsDisguises");
-		for (String cmd : disgPlugin.getDescription().getCommands().keySet()) {
-			if (cmd.equals("disguise") || cmd.equals("undisguise") || cmd.equals("disguisemodify") || cmd.equals("copydisguise") || cmd.equals("disguisehelp")) continue;
-			disgPlugin.getCommand(cmd).setTabCompleter(null);
-			disgPlugin.getCommand(cmd).setExecutor(this);
-		}
+		onEvent(new PluginEnableEvent(getServer().getPluginManager().getPlugin("LibsDisguises")));
 	}
 
 	@Override
@@ -33,6 +29,17 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
 	private static float safeYMod(float f) {
 		return Math.max(-256f, Math.min(256f, f));
+	}
+
+	@EventHandler
+	public void onEvent(PluginEnableEvent event) {
+		if (!event.getPlugin().getName().equals("LibsDisguises")) return;
+		JavaPlugin disgPlugin = (JavaPlugin) event.getPlugin();
+		for (String cmd : event.getPlugin().getDescription().getCommands().keySet()) {
+			if (cmd.equals("disguise") || cmd.equals("undisguise") || cmd.equals("disguisemodify") || cmd.equals("copydisguise") || cmd.equals("disguisehelp")) continue;
+			disgPlugin.getCommand(cmd).setTabCompleter(null);
+			disgPlugin.getCommand(cmd).setExecutor(this);
+		}
 	}
 
 	@EventHandler
