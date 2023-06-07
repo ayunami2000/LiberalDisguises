@@ -53,13 +53,15 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 			event.getCommandSender().sendMessage(ChatColor.RED + "You cannot use Fishing Hook disguises");
 			return;
 		}
-		String name = event.getDisguise().getDisguiseName();
-		int len = name.length();
-		int noColorLen = ChatColor.stripColor(name).length();
-		// each color code counts as one char rather than two, for flexibility
-		if (((len - noColorLen) / 2) + noColorLen > 16) {
-			event.getCommandSender().sendMessage(ChatColor.RED + "Your disguise name is too long");
-			return;
+		String name = event.getDisguise().getWatcher().getCustomName();
+		if (name != null) {
+			int len = name.length();
+			int noColorLen = ChatColor.stripColor(name).length();
+			// each color code counts as one char rather than two, for flexibility
+			if (((len - noColorLen) / 2) + noColorLen > 24) {
+				event.getCommandSender().sendMessage(ChatColor.RED + "Your disguise name is too long");
+				return;
+			}
 		}
 		if (event.getDisguise().isPlayerDisguise()) {
 			PlayerDisguise playerDisguise = (PlayerDisguise) event.getDisguise();
