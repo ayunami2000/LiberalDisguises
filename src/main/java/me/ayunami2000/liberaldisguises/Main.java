@@ -1,7 +1,9 @@
 package me.ayunami2000.liberaldisguises;
 
+import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
+import me.libraryaddict.disguise.disguisetypes.watchers.AreaEffectCloudWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.PhantomWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.SlimeWatcher;
 import me.libraryaddict.disguise.events.DisguiseEvent;
@@ -19,6 +21,8 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);
 		onEvent(new PluginEnableEvent(getServer().getPluginManager().getPlugin("LibsDisguises")));
+		DisguiseConfig.setAutoUpdate(false);
+		DisguiseConfig.setNotifyUpdate(false);
 	}
 
 	@Override
@@ -59,6 +63,21 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 			return;
 		}
 		if (event.getDisguise().isHidePlayer()) event.getDisguise().setHidePlayer(false);
+		if (event.getDisguise().getWatcher() instanceof AreaEffectCloudWatcher watcher) {
+			if (watcher.getRadius() > 5) {
+				watcher.setRadius(5);
+			} else if (watcher.getRadius() < 0) {
+				watcher.setRadius(0);
+			}
+		}
+		String name = event.getDisguise().getDisguiseName();
+		int len = name.length();
+		int noColorLen = ChatColor.stripColor(name).length();
+		// each color code counts as one char rather than two, for flexibility
+		if (((len - noColorLen) / 2) + noColorLen > 16) {
+			event.getCommandSender().sendMessage(ChatColor.RED + "Your disguise name is too long");
+			return;
+		}
 		event.getDisguise().getWatcher().setNameYModifier(safeYMod(event.getDisguise().getWatcher().getNameYModifier()));
 		event.getDisguise().getWatcher().setYModifier(safeYMod(event.getDisguise().getWatcher().getYModifier()));
 		if (event.getDisguise().getWatcher() instanceof SlimeWatcher watcher && watcher.getSize() > 10) watcher.setSize(10);
