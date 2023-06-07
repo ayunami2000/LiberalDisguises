@@ -49,6 +49,18 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 	@EventHandler
 	public void onEvent(DisguiseEvent event) {
 		event.setCancelled(true);
+		if (event.getDisguise().getType() == DisguiseType.FISHING_HOOK) {
+			event.getCommandSender().sendMessage(ChatColor.RED + "You cannot use Fishing Hook disguises");
+			return;
+		}
+		String name = event.getDisguise().getDisguiseName();
+		int len = name.length();
+		int noColorLen = ChatColor.stripColor(name).length();
+		// each color code counts as one char rather than two, for flexibility
+		if (((len - noColorLen) / 2) + noColorLen > 16) {
+			event.getCommandSender().sendMessage(ChatColor.RED + "Your disguise name is too long");
+			return;
+		}
 		if (event.getDisguise().isPlayerDisguise()) {
 			PlayerDisguise playerDisguise = (PlayerDisguise) event.getDisguise();
 			String targetName = playerDisguise.getName();
@@ -58,10 +70,6 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 			playerDisguise.getWatcher().setNameYModifier(0);
 			playerDisguise.setSkin(targetName);
 		}
-		if (event.getDisguise().getType() == DisguiseType.FISHING_HOOK) {
-			event.getCommandSender().sendMessage(ChatColor.RED + "You cannot use Fishing Hook disguises");
-			return;
-		}
 		if (event.getDisguise().isHidePlayer()) event.getDisguise().setHidePlayer(false);
 		if (event.getDisguise().getWatcher() instanceof AreaEffectCloudWatcher watcher) {
 			if (watcher.getRadius() > 5) {
@@ -69,14 +77,6 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 			} else if (watcher.getRadius() < 0) {
 				watcher.setRadius(0);
 			}
-		}
-		String name = event.getDisguise().getDisguiseName();
-		int len = name.length();
-		int noColorLen = ChatColor.stripColor(name).length();
-		// each color code counts as one char rather than two, for flexibility
-		if (((len - noColorLen) / 2) + noColorLen > 16) {
-			event.getCommandSender().sendMessage(ChatColor.RED + "Your disguise name is too long");
-			return;
 		}
 		event.getDisguise().getWatcher().setNameYModifier(safeYMod(event.getDisguise().getWatcher().getNameYModifier()));
 		event.getDisguise().getWatcher().setYModifier(safeYMod(event.getDisguise().getWatcher().getYModifier()));
