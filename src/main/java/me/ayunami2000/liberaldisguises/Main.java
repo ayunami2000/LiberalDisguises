@@ -4,8 +4,10 @@ import me.libraryaddict.disguise.DisguiseConfig;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 import me.libraryaddict.disguise.disguisetypes.watchers.AreaEffectCloudWatcher;
+import me.libraryaddict.disguise.disguisetypes.watchers.EnderDragonWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.PhantomWatcher;
 import me.libraryaddict.disguise.disguisetypes.watchers.SlimeWatcher;
+import me.libraryaddict.disguise.disguisetypes.watchers.WitherWatcher;
 import me.libraryaddict.disguise.events.DisguiseEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -81,6 +83,8 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 				return;
 			}
 		}
+		if (event.getDisguise().getWatcher() instanceof EnderDragonWatcher watcher && watcher.getPhase() == 7) watcher.setPhase(6);
+		if (event.getDisguise().getWatcher() instanceof WitherWatcher watcher && watcher.getInvulnerability() > 2048) watcher.setInvulnerability(2048);
 		if (event.getDisguise().isPlayerDisguise()) {
 			PlayerDisguise playerDisguise = (PlayerDisguise) event.getDisguise();
 			String targetName = playerDisguise.getName();
@@ -89,6 +93,8 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 			playerDisguise.setNameVisible(true);
 			playerDisguise.getWatcher().setNameYModifier(0);
 			playerDisguise.setSkin(targetName);
+			playerDisguise.setDisplayedInTab(false);
+			playerDisguise.setTablistName(origName);
 		}
 		if (event.getDisguise().isHidePlayer()) event.getDisguise().setHidePlayer(false);
 		if (event.getDisguise().getWatcher() instanceof AreaEffectCloudWatcher watcher) {
