@@ -13,6 +13,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,10 +41,28 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 		if (!event.getPlugin().getName().equals("LibsDisguises")) return;
 		JavaPlugin disgPlugin = (JavaPlugin) event.getPlugin();
 		for (String cmd : event.getPlugin().getDescription().getCommands().keySet()) {
-			if (cmd.equals("disguise") || cmd.equals("undisguise") || cmd.equals("disguisemodify") || cmd.equals("copydisguise") || cmd.equals("disguisehelp")) continue;
+			if (cmd.equals("disguise") || cmd.equals("undisguise") || cmd.equals("disguisemodify") || cmd.equals("copydisguise") || cmd.equals("disguisehelp") || cmd.equals("disguiseviewself"))
+				continue;
 			disgPlugin.getCommand(cmd).setTabCompleter(null);
 			disgPlugin.getCommand(cmd).setExecutor(this);
 		}
+	}
+
+	@EventHandler
+	public void onEvent(PluginDisableEvent event) {
+		if (!event.getPlugin().getName().equals("LibsDisguises")) return;
+		int[] xd = new int[1];
+		xd[0] = getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
+			JavaPlugin disgPlugin = (JavaPlugin) getServer().getPluginManager().getPlugin("LibsDisguises");
+			if (disgPlugin != null && disgPlugin.isEnabled()) {
+				for (String cmd : disgPlugin.getDescription().getCommands().keySet()) {
+					disgPlugin.getCommand(cmd).setTabCompleter(null);
+					disgPlugin.getCommand(cmd).setExecutor(this);
+				}
+				getLogger().warning("All LibsDisguises commands have been disabled due to a reload. Please restart the server to re-enable LibsDisguises. (Not my fault for the scuffed DisguiseEvent listener behavior -ayunami2000)");
+				getServer().getScheduler().cancelTask(xd[0]);
+			}
+		}, 0, 1);
 	}
 
 	@EventHandler
@@ -55,10 +74,9 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 		}
 		String name = event.getDisguise().getWatcher().getCustomName();
 		if (name != null) {
-			int len = name.length();
 			int noColorLen = ChatColor.stripColor(name).length();
 			// each color code counts as one char rather than two, for flexibility
-			if (((len - noColorLen) / 2) + noColorLen > 24) {
+			if (((name.length() - noColorLen) / 2) + noColorLen > 24) {
 				event.getCommandSender().sendMessage(ChatColor.RED + "Your disguise name is too long");
 				return;
 			}
@@ -82,7 +100,8 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 		}
 		event.getDisguise().getWatcher().setNameYModifier(safeYMod(event.getDisguise().getWatcher().getNameYModifier()));
 		event.getDisguise().getWatcher().setYModifier(safeYMod(event.getDisguise().getWatcher().getYModifier()));
-		if (event.getDisguise().getWatcher() instanceof SlimeWatcher watcher && watcher.getSize() > 10) watcher.setSize(10);
+		if (event.getDisguise().getWatcher() instanceof SlimeWatcher watcher && watcher.getSize() > 10)
+			watcher.setSize(10);
 		if (event.getDisguise().getWatcher() instanceof PhantomWatcher watcher) {
 			if (watcher.getSize() > 20) {
 				watcher.setSize(20);
