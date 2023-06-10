@@ -13,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -23,9 +24,21 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 	@Override
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);
-		onEvent(new PluginEnableEvent(getServer().getPluginManager().getPlugin("LibsDisguises")));
-		DisguiseConfig.setAutoUpdate(false);
-		DisguiseConfig.setNotifyUpdate(false);
+		JavaPlugin disgPlugin = (JavaPlugin) getServer().getPluginManager().getPlugin("LibsDisguises");
+		if (disgPlugin != null) onEvent(new PluginEnableEvent(disgPlugin));
+	}
+
+	@Override
+	public void onDisable() {
+		JavaPlugin disgPlugin = (JavaPlugin) getServer().getPluginManager().getPlugin("LibsDisguises");
+		if (disgPlugin != null && disgPlugin.isEnabled()) {
+			for (String cmd : disgPlugin.getDescription().getCommands().keySet()) {
+				PluginCommand pc = disgPlugin.getCommand(cmd);
+				pc.setTabCompleter(null);
+				pc.setExecutor(this);
+			}
+			getLogger().warning("All LibsDisguises commands have been disabled for safety. Please restart the server to re-enable LibsDisguises.");
+		}
 	}
 
 	@Override
@@ -41,12 +54,15 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 	@EventHandler
 	public void onEvent(PluginEnableEvent event) {
 		if (!event.getPlugin().getName().equals("LibsDisguises")) return;
+		DisguiseConfig.setAutoUpdate(false);
+		DisguiseConfig.setNotifyUpdate(false);
 		JavaPlugin disgPlugin = (JavaPlugin) event.getPlugin();
 		for (String cmd : event.getPlugin().getDescription().getCommands().keySet()) {
 			if (cmd.equals("disguise") || cmd.equals("undisguise") || cmd.equals("disguisemodify") || cmd.equals("copydisguise") || cmd.equals("disguisehelp") || cmd.equals("disguiseviewself"))
 				continue;
-			disgPlugin.getCommand(cmd).setTabCompleter(null);
-			disgPlugin.getCommand(cmd).setExecutor(this);
+			PluginCommand pc = disgPlugin.getCommand(cmd);
+			pc.setTabCompleter(null);
+			pc.setExecutor(this);
 		}
 	}
 
@@ -58,8 +74,9 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 			JavaPlugin disgPlugin = (JavaPlugin) getServer().getPluginManager().getPlugin("LibsDisguises");
 			if (disgPlugin != null && disgPlugin.isEnabled()) {
 				for (String cmd : disgPlugin.getDescription().getCommands().keySet()) {
-					disgPlugin.getCommand(cmd).setTabCompleter(null);
-					disgPlugin.getCommand(cmd).setExecutor(this);
+					PluginCommand pc = disgPlugin.getCommand(cmd);
+					pc.setTabCompleter(null);
+					pc.setExecutor(this);
 				}
 				getLogger().warning("All LibsDisguises commands have been disabled due to a reload. Please restart the server to re-enable LibsDisguises. (Not my fault for the scuffed DisguiseEvent listener behavior -ayunami2000)");
 				getServer().getScheduler().cancelTask(xd[0]);
@@ -78,7 +95,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 		if (name != null) {
 			int noColorLen = ChatColor.stripColor(name).length();
 			// each color code counts as one char rather than two, for flexibility
-			if (((name.length() - noColorLen) / 2) + noColorLen > 24) {
+			if (((name.length() - noColorLen) / 2) + noColorLen > 32) {
 				event.getCommandSender().sendMessage(ChatColor.RED + "Your disguise name is too long");
 				return;
 			}
